@@ -1,0 +1,22 @@
+# Support Vector Machine (Polynomial Kernel) on Diabetes Data
+
+library(tidyverse)
+library(caret)
+
+s <- read.csv(file.choose()) # diabetes.csv
+s$Outcome <- as.factor(s$Outcome)
+
+set.seed(123)
+parts <- createDataPartition(s$Outcome, p = 0.8, list = FALSE)
+train <- s[parts, ]
+test <- s[-parts, ]
+
+# Polynomial SVM with degree tuning
+train_control <- trainControl(method = "cv", number = 5)
+model <- train(Outcome ~ ., data = train, method = "svmPoly",
+               trControl = train_control,
+               tuneGrid = expand.grid(.degree = c(2, 3, 4)))
+
+# Predict and evaluate
+pred_y <- predict(model, test)
+confusionMatrix(pred_y, test$Outcome)
